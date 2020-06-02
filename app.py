@@ -31,8 +31,16 @@ async def on_message(message):
 
     if content[:6] == "howdoi":
        print("client call for howdoi")
-    if content.startswith('!'):
+       # Send the message 
+       botMsg = await message.channel.send('<@{}>, hello'.format(message.author.id))
+       # Add the reactions to the bot's message
+       await botMsg.add_reaction('✅')
+       await botMsg.add_reaction('❌')
 
+       # then wait for which reaction they click
+       # and go from there
+
+    elif content.startswith('!'):
         content = content[1:]
         if content.startswith('test'):
             counter = 0
@@ -42,6 +50,10 @@ async def on_message(message):
                     counter += 1
 
             await client.edit_message(tmp, 'You have {} messages.'.format(counter))
+
+@client.event
+async def on_reaction_add(reaction,user):
+   print(reaction,user)
 
 # Get the last arg (the discord token)      
 if len(sys.argv) > 1:
