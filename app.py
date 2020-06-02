@@ -1,6 +1,8 @@
 import discord
 import asyncio
 import sys
+import re
+from howdoi import howdoi
 
 from flask import Flask, request
 app = Flask(__name__)
@@ -32,8 +34,10 @@ async def on_message(message):
     if content[:6] == "howdoi":
        print("client call for howdoi")
        # Send the message 
-       botMsg = await message.channel.send('<@{}>, hello'.format(message.author.id))
-       # Add the reactions to the bot's message
+       # Send the message 
+       response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(content.split(' '))))
+       response = re.sub(r'\n\n+', '\n\n', response).strip()   
+       botMsg = await message.channel.send(response)       # Add the reactions to the bot's message
        await botMsg.add_reaction('✅')
        await botMsg.add_reaction('❌')
 
