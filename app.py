@@ -26,7 +26,11 @@ async def on_message(message):
 
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    print(content) 
+    print(content)
+    content = content.lower()  
+    r1 =content.find("howdoi")
+    if r1 != -1:
+       print("client call for howdoi")
     if content.startswith('!'):
 
         content = content[1:]
