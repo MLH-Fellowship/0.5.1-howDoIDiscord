@@ -12,9 +12,9 @@ Discord bot for howdoi
   
 2.Install dependencies using pip.
   `pip install -r requirements.txt`
-3.Run the app with the following:
+3.Run the app with the following with Token of the DiscordBot:
 
-  `python ./app.py`
+  `python ./app.py $Token`
   
 once Flask app start The bot is now listening for messages in the channel and will log them to console
 Web at localhost:5000.
