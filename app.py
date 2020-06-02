@@ -14,9 +14,7 @@ client = discord.Client()
 
 @client.event
 async def on_ready():
-    print('Logged in as')
-    print(client.user.name)
-    print(client.user.id)
+    print('Logged in as {} - {}'.format(client.user.name, client.user.id))
     print('------')
 
 @client.event
@@ -29,8 +27,9 @@ async def on_message(message):
     fullUser = message.author.name+'#'+message.author.discriminator
     print(content)
     content = content.lower()  
-    r1 =content.find("howdoi")
-    if r1 != -1:
+
+
+    if content[:6] == "howdoi":
        print("client call for howdoi")
     if content.startswith('!'):
 
@@ -45,4 +44,8 @@ async def on_message(message):
             await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
 # Get the last arg (the discord token)      
-client.run(sys.argv[len(sys.argv)-1])
+if len(sys.argv) > 1:
+   client.run(sys.argv[len(sys.argv)-1])
+else:
+   print("Invalid args")
+   print("Use: python app.py token")
