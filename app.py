@@ -30,8 +30,8 @@ async def on_message(message):
     print(content)
     content = content.lower()  
 
-
-    if content[:6] == "howdoi":
+    r1 = content.find("howdoi")
+    if r1 != -1:
        print("client call for howdoi")
        # Send the message 
        # Send the message 
