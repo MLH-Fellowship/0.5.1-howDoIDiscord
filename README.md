@@ -12,6 +12,7 @@ Discord bot for howdoi
   
 2.Install dependencies using pip.
   `pip install -r requirements.txt`
+  
 3.Run the app with the following with Token of the DiscordBot:
 
   `python ./app.py $Token`
