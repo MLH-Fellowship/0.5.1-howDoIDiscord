@@ -1,5 +1,6 @@
 import discord
 import asyncio
+import sys
 
 from flask import Flask, request
 app = Flask(__name__)
@@ -43,4 +44,5 @@ async def on_message(message):
 
             await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
-client.run('NzE3Mzg1NTE2NTMzODA5MjE0.XtZjmw.4JgvB046BCUKf6PPwRRvM_Oz0Ag')
+# Get the last arg (the discord token)      
+client.run(sys.argv[len(sys.argv)-1])
