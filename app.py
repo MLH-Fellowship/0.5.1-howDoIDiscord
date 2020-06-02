@@ -26,7 +26,7 @@ async def on_message(message):
 
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    print(str(message.timestamp)+" #"+message.channel.name+" "+fullUser+": "+str(content.encode('ascii', 'ignore').decode('ascii')))
+    print(content) 
     if content.startswith('!'):
 
         content = content[1:]
