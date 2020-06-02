@@ -6,12 +6,15 @@ Discord bot for howdoi
 ![Architecture of this app in terms of it's elements](https://i.imgur.com/tT5vu3A.png)
 # Installation
 ## Discord bot
-
 1.create a virtualenv and initialize it. This may vary depending on your operating system. 
+
   `virtualenv env && source env/bin/activate`
+  
 2.Install dependencies using pip.
   `pip install -r requirements.txt`
 3.Run the app with the following:
+
   `export FLASK_APP=main.py && flask run`
+  
 once Flask app start The bot is now listening for messages in the channel and will log them to console
- Web at localhost:5000.
+Web at localhost:5000.
