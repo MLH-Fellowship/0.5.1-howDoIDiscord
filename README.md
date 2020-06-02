@@ -14,7 +14,7 @@ Discord bot for howdoi
   `pip install -r requirements.txt`
 3.Run the app with the following:
 
-  `export FLASK_APP=main.py && flask run`
+  `python ./app.py`
   
 once Flask app start The bot is now listening for messages in the channel and will log them to console
 Web at localhost:5000.
