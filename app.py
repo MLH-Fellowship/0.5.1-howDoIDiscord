@@ -70,7 +70,7 @@ async def on_reaction_add(reaction,user):
     print("Target user:     {}".format(targetUser))
     print("reaction user:   {}".format(user.id))
     if (reaction.emoji == "❌"):
-        if (id(targetUser) == user.id):
+        if (targetUser == user.id):
             print("same person")
         else:
             print("Not the same person")
