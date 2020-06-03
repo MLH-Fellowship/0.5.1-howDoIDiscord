@@ -31,25 +31,56 @@ def writeJSON(data):
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
-async def callHowDoI(message):
+async def callHowDoI(message, testing):
     startTime = int(round(time.time() * 1000))
-    content = message.content
-    fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()  
     
-    response = "<@{}>, {}".format(message.author.id, _howdoi(content))
-    # Send the message 
-    #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-    embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
+    if not testing:
+        content = message.content
+        content = content.lower()  
+    
+        response = "<@{}>, {}".format(message.author.id, _howdoi(content))
+        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
 
-    botMsg = await message.channel.send(embed=embed) 
-    
-    
-    endTime = int(round(time.time() * 1000))
-    logCall(content, fullUser,endTime-startTime)
-    
-    await botMsg.add_reaction('✅')
-    await botMsg.add_reaction('❌')
+        botMsg = await message.channel.send(embed=embed) 
+        fullUser = message.author.name+'#'+message.author.discriminator
+        
+        endTime = int(round(time.time() * 1000))
+        logCall(content, fullUser,endTime-startTime)
+        
+        await botMsg.add_reaction('✅')
+        await botMsg.add_reaction('❌')
+    else:
+        # Escape the url encoded characters such as %20
+        unescapedQuery = message["query"].replace("%20", " ")
+        response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
+        return response
+
+# Route made for testing the system through HTTP requests
+@app.route('/test', methods=["POST"])
+def test():
+    testQuery = request.args.get('testquery')
+    if not testQuery:
+        return {
+            "status":"error",
+            "body":"invalid paramaters"
+            }, 400
+    if testQuery[:6] != "howdoi":
+          return {
+            "status":"error",
+            "body":"howdoi keyword not found"
+            }, 400
+
+
+    testMessage = {
+        "author":"test",
+        "query": testQuery
+    }
+   
+    testCall = loop.run_until_complete(callHowDoI(testMessage, True))
+    return {
+        "status":"success",
+        "body": testCall
+    }, 200
 
 
 @app.route('/posts', methods=['POST'])
@@ -77,7 +108,7 @@ async def on_message(message):
 
     r1 = content.find("howdoi")
     if r1 != -1:
-        await callHowDoI(message)
+        await callHowDoI(message, False)
 
        # then wait for which reaction they click
        # and go from there
@@ -123,4 +154,12 @@ async def on_reaction_add(reaction,user):
 async def voice(ctx, arg):
     await ctx.send(arg)
 
-client.run(TOKEN)
+
+# If testing env variable set it means the script
+# is unit testing and only needs the flask server
+# not the discord bot
+if os.getenv("testing"):
+    loop = asyncio.get_event_loop()
+    app.run()
+else:
+    client.run(TOKEN)
