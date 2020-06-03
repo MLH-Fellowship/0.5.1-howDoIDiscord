@@ -15,7 +15,7 @@ Discord bot for howdoi
   
 3.Run the app with the following with Token of the DiscordBot:
 
-  `python ./app.py $Token`
+  `python ./app.py`
   
 once Flask app start The bot is now listening for messages in the channel and will log them to console
 Web at localhost:5000.
