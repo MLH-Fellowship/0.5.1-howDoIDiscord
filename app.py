@@ -7,8 +7,12 @@ import time
 import json
 from howdoi import howdoi
 from datetime import datetime
+from dotenv import load_dotenv
 
 from flask import Flask, request
+import os
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
 app = Flask(__name__)
 
 def _howdoi(query):
@@ -22,7 +26,7 @@ def _howdoi(query):
 
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
-            json.dump(data, writeFile)
+        json.dump(data, writeFile)
 
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
@@ -56,7 +60,7 @@ async def on_message(message):
         response = "<@{}>, {}".format(message.author.id, _howdoi(content))
         # Send the message 
         #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response)
+        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
 
         botMsg = await message.channel.send(embed=embed) 
         
@@ -66,6 +70,7 @@ async def on_message(message):
        
         await botMsg.add_reaction('✅')
         await botMsg.add_reaction('❌')
+
 
        # then wait for which reaction they click
        # and go from there
@@ -105,7 +110,6 @@ async def on_reaction_add(reaction,user):
                     temp.append(data)
                     writeJSON(jsonData)
      
-    
 
 # handle voice command in the future
 @client.command(name="voice")
@@ -113,8 +117,4 @@ async def voice(ctx, arg):
     await ctx.send(arg)
 
 # Get the last arg (the discord token)      
-if len(sys.argv) > 1:
-    client.run(sys.argv[len(sys.argv)-1])
-else:
-   print("Invalid args")
-   print("Use: python app.py token")
+client.run(TOKEN)
