@@ -58,7 +58,7 @@ async def callHowDoI(message, testing):
 # Route made for testing the system through HTTP requests
 @app.route('/test', methods=["POST"])
 def test():
-    testQuery = request.args.get('testquery')
+    testQuery = request.args.get('testquery') 
     if not testQuery:
         return {
             "status":"error",
