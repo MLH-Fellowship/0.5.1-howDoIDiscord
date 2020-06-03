@@ -31,6 +31,27 @@ def writeJSON(data):
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
+async def callHowDoI(message):
+    startTime = int(round(time.time() * 1000))
+    content = message.content
+    fullUser = message.author.name+'#'+message.author.discriminator
+    content = content.lower()  
+    
+    response = "<@{}>, {}".format(message.author.id, _howdoi(content))
+    # Send the message 
+    #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
+    embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
+
+    botMsg = await message.channel.send(embed=embed) 
+    
+    
+    endTime = int(round(time.time() * 1000))
+    logCall(content, fullUser,endTime-startTime)
+    
+    await botMsg.add_reaction('✅')
+    await botMsg.add_reaction('❌')
+
+
 @app.route('/posts', methods=['POST'])
 def result():
     print(request.form['sched'])
@@ -56,21 +77,7 @@ async def on_message(message):
 
     r1 = content.find("howdoi")
     if r1 != -1:
-        startTime = int(round(time.time() * 1000))
-        response = "<@{}>, {}".format(message.author.id, _howdoi(content))
-        # Send the message 
-        #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
-
-        botMsg = await message.channel.send(embed=embed) 
-        
-        
-        endTime = int(round(time.time() * 1000))
-        logCall(content, fullUser,endTime-startTime)
-       
-        await botMsg.add_reaction('✅')
-        await botMsg.add_reaction('❌')
-
+        await callHowDoI(message)
 
        # then wait for which reaction they click
        # and go from there
@@ -116,5 +123,4 @@ async def on_reaction_add(reaction,user):
 async def voice(ctx, arg):
     await ctx.send(arg)
 
-# Get the last arg (the discord token)      
 client.run(TOKEN)
