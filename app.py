@@ -1,4 +1,5 @@
 import discord
+from discord.ext.commands import Bot
 import asyncio
 import sys
 import re
@@ -22,7 +23,7 @@ def result():
     # Send a message to a discord text channel etc...
     return 'Received !'
 
-client = discord.Client()
+client = Bot(command_prefix = "$")
 
 @client.event
 async def on_ready():
@@ -67,9 +68,14 @@ async def on_message(message):
 async def on_reaction_add(reaction,user):
    print(reaction,user)
 
+# handle voice command in the future
+@client.command(name="voice")
+async def voice(ctx, arg):
+    await ctx.send(arg)
+
 # Get the last arg (the discord token)      
 if len(sys.argv) > 1:
-   client.run(sys.argv[len(sys.argv)-1])
+    client.run(sys.argv[len(sys.argv)-1])
 else:
    print("Invalid args")
    print("Use: python app.py token")
