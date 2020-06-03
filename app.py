@@ -16,13 +16,21 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 app = Flask(__name__)
 
 def _howdoi(query):
-    # Return this if no query provided along with howdoi prompt
     query_list = query.split(' ')
-    if len(query_list) == 1:
-        return 'Don\'t be shy, ask me anything!'
-    response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(query_list)))
+    args = {
+        'query': query_list,
+        'num_answers': 1, 
+        'pos': 1, 
+        'all': True,
+        'link': False,
+        'clear_cache': False,
+        'version': False,
+        'color': False
+    }
+    # TO DO : update according to user params
+    response = howdoi.howdoi(args)
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
-    return response 
+    return response
 
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
@@ -31,27 +39,38 @@ def writeJSON(data):
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
-async def callHowDoI(message):
+async def callHowDoI(message, index, substr):
     startTime = int(round(time.time() * 1000))
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()  
-    
-    response = "<@{}>, {}".format(message.author.id, _howdoi(content))
-    # Send the message 
-    #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-    embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
+    content = content.lower() 
+    link = ''
 
-    botMsg = await message.channel.send(embed=embed) 
+    if ((index + len(substr) == len(content))):
+        res = 'Don\'t be shy, ask me anything!'
+    else:
+        val = _howdoi(content)
+        if (val[0] == '★'):
+            res = " ".join(val.split('\n', 1)[1:])
+            link = val.split('\n', 1)[0]
+        else:
+            res = val 
+            link = "Sorry, could not find a good link for this!"
     
-    
-    endTime = int(round(time.time() * 1000))
-    logCall(content, fullUser,endTime-startTime)
-    
-    await botMsg.add_reaction('✅')
-    await botMsg.add_reaction('❌')
+    response = "<@{}>, {}".format(message.author.id, res)
+    embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
+    embed.set_footer(text = link)
 
-
+    try:
+        botMsg = await message.channel.send(embed = embed)
+    except Exception as err:
+        print("Oops! {}".format(err))
+    else:
+        endTime = int(round(time.time() * 1000))
+        logCall(content, fullUser,endTime-startTime)
+        await botMsg.add_reaction('✅') 
+        await botMsg.add_reaction('❌') 
+    
 @app.route('/posts', methods=['POST'])
 def result():
     print(request.form['sched'])
@@ -73,12 +92,13 @@ async def on_message(message):
 
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()  
+    content = content.lower()
+    substr = "howdoi"
 
-    r1 = content.find("howdoi")
+    r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
     if r1 != -1:
-        await callHowDoI(message)
-
+        await callHowDoI(message, r1, substr)
+      
        # then wait for which reaction they click
        # and go from there
 
