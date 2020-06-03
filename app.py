@@ -89,9 +89,7 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-    content = message.content
-    fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()
+    content = message.content.lower()
     substr = "howdoi"
 
     r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
