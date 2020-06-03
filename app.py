@@ -162,7 +162,9 @@ print("DISCORD TOKEN: ", os.getenv('DISCORD_TOKEN'))
 # is unit testing and only needs the flask server
 # not the discord bot
 if os.getenv("testing"):
+    print("In testing mode")
     loop = asyncio.get_event_loop()
     app.run()
 else:
+    print("In discord mode")
     client.run(TOKEN)
