@@ -162,7 +162,7 @@ print("TESTING IS ", os.getenv('TESTING'))
 # If testing env variable set it means the script
 # is unit testing and only needs the flask server
 # not the discord bot
-if os.getenv("testing"):
+if os.getenv("TESTING"):
     print("In testing mode")
     loop = asyncio.get_event_loop()
     app.run()
