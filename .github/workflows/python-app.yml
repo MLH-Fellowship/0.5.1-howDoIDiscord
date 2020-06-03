@@ -28,9 +28,6 @@ jobs:
     - name: Start flask server
       run: |
         python app.py
-      env:
-        DISCORD_TOKEN: ${{ secrets.DISCORD_TOKEN }}
-
     - name: Test with pytest
       run: |
         pytest
