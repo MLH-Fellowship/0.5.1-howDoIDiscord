@@ -3,6 +3,8 @@ from discord.ext.commands import Bot
 import asyncio
 import sys
 import re
+import time
+import json
 from howdoi import howdoi
 
 from flask import Flask, request
@@ -16,6 +18,10 @@ def _howdoi(query):
     response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(query_list)))
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response 
+
+def writeJSON(data):
+    with open("logs.json", "w") as writeFile:
+        json.dump(data, writeFile)
 
 @app.route('/posts', methods=['POST'])
 def result():
@@ -70,12 +76,23 @@ async def on_reaction_add(reaction,user):
     print("Target user:     {}".format(targetUser))
     print("reaction user:   {}".format(user.id))
     if (reaction.emoji == "❌"):
-        if (targetUser == user.id):
-            print("same person")
+        if (str(targetUser) == str(user.id)):
+            # the correct user reacted and didn't like the 
+            # response
+            data = {}
+            data["time"] = int(time.time())
+            data["response"] = reaction.message.content.split(",")[1:]
+            data["user"] = targetUser
+
+            with open ("logs.json") as file:
+                jsonData = json.load(file)
+                temp = jsonData["logs"]
+                temp.append(data)
+
+                writeJSON(jsonData)
         else:
             print("Not the same person")
     
-        print("not the same person")
     # print(reaction,user)
 
 # handle voice command in the future
