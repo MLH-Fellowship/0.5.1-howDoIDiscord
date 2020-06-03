@@ -63,7 +63,7 @@ async def callHowDoI(message, index, substr):
 
     try:
         botMsg = await message.channel.send(embed = embed)
-    except Exception as err:
+    except discord.DiscordException as err:
         print("Oops! {}".format(err))
     else:
         endTime = int(round(time.time() * 1000))
@@ -89,7 +89,6 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
     content = content.lower()
