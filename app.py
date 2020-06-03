@@ -49,11 +49,10 @@ async def on_message(message):
 
     r1 = content.find("howdoi")
     if r1 != -1:
-        print("client call for howdoi")
-        response = _howdoi(content)
+        response = "<@{}>, {}".format(message.author.id, _howdoi(content))
         # Send the message 
         #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), author=message.author.id, description=response)
+        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response)
 
         botMsg = await message.channel.send(embed=embed) 
        
@@ -77,17 +76,17 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction,user):
     if (len(reaction.message.embeds) > 0):
-        print("is an embed")
         # if it's an embed message
         msgContent = reaction.message.embeds[0].description
+       
         # Target user is the user being mentioned
-        targetUser = reaction.message.embeds[0].author
-        
+        targetUser = reaction.message.embeds[0].description.split(',')[0]
+       
         if (reaction.emoji == "❌"):
             if ("717385516533809214" != str(user.id)):
-                # the correct user reacted and didn't like the response
+                # A user reacted and didn't like the response
                 data = {}
-                data["user"] = "test"
+                data["user"] = targetUser
                 data["query"] = reaction.message.embeds[0].title
                 data["response"] = msgContent
                 data["time"] = int(time.time())               
@@ -97,7 +96,7 @@ async def on_reaction_add(reaction,user):
                     temp = jsonData['logs']
                     temp.append(data)
                     writeJSON(jsonData)
-
+     
     
 
 # handle voice command in the future
