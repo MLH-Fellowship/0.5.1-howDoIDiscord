@@ -155,6 +155,9 @@ async def voice(ctx, arg):
     await ctx.send(arg)
 
 
+print("DISCORD TOKEN: ", TOKEN)
+print("DISCORD TOKEN: ", os.getenv('DISCORD_TOKEN'))
+
 # If testing env variable set it means the script
 # is unit testing and only needs the flask server
 # not the discord bot
