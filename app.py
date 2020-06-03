@@ -6,8 +6,11 @@ import re
 import time
 import json
 from howdoi import howdoi
-
+from dotenv import load_dotenv
 from flask import Flask, request
+import os
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
 app = Flask(__name__)
 
 def _howdoi(query):
@@ -21,7 +24,7 @@ def _howdoi(query):
 
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
-            json.dump(data, writeFile)
+        json.dump(data, writeFile)
 
 @app.route('/posts', methods=['POST'])
 def result():
@@ -49,16 +52,11 @@ async def on_message(message):
 
     r1 = content.find("howdoi")
     if r1 != -1:
-        print("client call for howdoi")
-        response = _howdoi(content)
-        # Send the message 
-        #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
-        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), author=message.author.id, description=response)
-
-        botMsg = await message.channel.send(embed=embed) 
-       
-        await botMsg.add_reaction('✅')
-        await botMsg.add_reaction('❌')
+       print("client call for howdoi")
+       # Send the message 
+       botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content)))       # Add the reactions to the bot's message
+       await botMsg.add_reaction('✅')
+       await botMsg.add_reaction('❌')
 
        # then wait for which reaction they click
        # and go from there
@@ -76,29 +74,29 @@ async def on_message(message):
 
 @client.event
 async def on_reaction_add(reaction,user):
-    if (len(reaction.message.embeds) > 0):
-        print("is an embed")
-        # if it's an embed message
-        msgContent = reaction.message.embeds[0].description
-        # Target user is the user being mentioned
-        targetUser = reaction.message.embeds[0].author
-        
-        if (reaction.emoji == "❌"):
-            if ("717385516533809214" != str(user.id)):
-                # the correct user reacted and didn't like the response
-                data = {}
-                data["user"] = "test"
-                data["query"] = reaction.message.embeds[0].title
-                data["response"] = msgContent
-                data["time"] = int(time.time())               
+    msgContent = reaction.message.content.split(",")[0]
+    targetUser = msgContent[2:-1]
+    print("Target user:     {}".format(targetUser))
+    print("reaction user:   {}".format(user.id))
+    if (reaction.emoji == "❌"):
+        if (str(targetUser) == str(user.id)):
+            # the correct user reacted and didn't like the 
+            # response
+            data = {}
+            data["time"] = int(time.time())
+            data["response"] = reaction.message.content.split(",")[1:]
+            data["user"] = targetUser
 
-                with open ("logs.json") as file:
-                    jsonData = json.load(file)
-                    temp = jsonData['logs']
-                    temp.append(data)
-                    writeJSON(jsonData)
+            with open ("logs.json") as file:
+                jsonData = json.load(file)
+                temp = jsonData["logs"]
+                temp.append(data)
 
+                writeJSON(jsonData)
+        else:
+            print("Not the same person")
     
+    # print(reaction,user)
 
 # handle voice command in the future
 @client.command(name="voice")
@@ -106,8 +104,4 @@ async def voice(ctx, arg):
     await ctx.send(arg)
 
 # Get the last arg (the discord token)      
-if len(sys.argv) > 1:
-    client.run(sys.argv[len(sys.argv)-1])
-else:
-   print("Invalid args")
-   print("Use: python app.py token")
+client.run(TOKEN)
