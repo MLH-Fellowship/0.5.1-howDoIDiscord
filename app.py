@@ -6,6 +6,7 @@ import re
 import time
 import json
 from howdoi import howdoi
+from datetime import datetime
 
 from flask import Flask, request
 app = Flask(__name__)
@@ -22,6 +23,9 @@ def _howdoi(query):
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
             json.dump(data, writeFile)
+
+def logCall(query, user, roundTripTime):
+    print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
 @app.route('/posts', methods=['POST'])
 def result():
@@ -44,17 +48,21 @@ async def on_message(message):
 
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    print(content)
     content = content.lower()  
 
     r1 = content.find("howdoi")
     if r1 != -1:
+        startTime = int(round(time.time() * 1000))
         response = "<@{}>, {}".format(message.author.id, _howdoi(content))
         # Send the message 
         #botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content))) 
         embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response)
 
         botMsg = await message.channel.send(embed=embed) 
+        
+        
+        endTime = int(round(time.time() * 1000))
+        logCall(content, fullUser,endTime-startTime)
        
         await botMsg.add_reaction('✅')
         await botMsg.add_reaction('❌')
