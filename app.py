@@ -45,8 +45,7 @@ async def on_message(message):
     if r1 != -1:
        print("client call for howdoi")
        # Send the message 
-       # Send the message 
-       botMsg = await message.channel.send(_howdoi(content))       # Add the reactions to the bot's message
+       botMsg = await message.channel.send("<@{}>, {}".format(message.author.id,_howdoi(content)))       # Add the reactions to the bot's message
        await botMsg.add_reaction('✅')
        await botMsg.add_reaction('❌')
 
@@ -66,7 +65,18 @@ async def on_message(message):
 
 @client.event
 async def on_reaction_add(reaction,user):
-   print(reaction,user)
+    msgContent = reaction.message.content.split(",")[0]
+    targetUser = msgContent[2:-1]
+    print("Target user:     {}".format(targetUser))
+    print("reaction user:   {}".format(user.id))
+    if (reaction.emoji == "❌"):
+        if (id(targetUser) == user.id):
+            print("same person")
+        else:
+            print("Not the same person")
+    
+        print("not the same person")
+    # print(reaction,user)
 
 # handle voice command in the future
 @client.command(name="voice")
