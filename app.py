@@ -6,6 +6,16 @@ from howdoi import howdoi
 
 from flask import Flask, request
 app = Flask(__name__)
+
+def _howdoi(query):
+    # Return this if no query provided along with howdoi prompt
+    query_list = query.split(' ')
+    if len(query_list) == 1:
+        return 'Don\'t be shy, ask me anything!'
+    response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(query_list)))
+    response = re.sub(r'\n\n+', '\n\n', response).strip() 
+    return response 
+
 @app.route('/posts', methods=['POST'])
 def result():
     print(request.form['sched'])
@@ -35,9 +45,7 @@ async def on_message(message):
        print("client call for howdoi")
        # Send the message 
        # Send the message 
-       response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(content.split(' '))))
-       response = re.sub(r'\n\n+', '\n\n', response).strip()   
-       botMsg = await message.channel.send(response)       # Add the reactions to the bot's message
+       botMsg = await message.channel.send(_howdoi(content))       # Add the reactions to the bot's message
        await botMsg.add_reaction('✅')
        await botMsg.add_reaction('❌')
 
