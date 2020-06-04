@@ -18,7 +18,7 @@ app = Flask(__name__)
 def _howdoi(query):
     query_list = query.split(' ')
     args = {
-        'query': 'Hey',
+        'query': '',
         'num_answers': 1, 
         'pos': 1, 
         'all': False,
@@ -27,10 +27,12 @@ def _howdoi(query):
         'version': False,
         'color': False
     }
-    # TO DO : update according to user params
-    for val in query_list:
-        if val in args:
-            args[val] = not args[val] # toggling values
+    # TO DO : finish update according to user params
+    for i in range(len(query_list)):
+        if query_list[i] in args:
+            args[query_list[i]] = not args[query_list[i]] # toggle values 
+            query_list.pop(i)
+    args['query'] = query_list
     print(args)
     response = howdoi.howdoi(args)
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
