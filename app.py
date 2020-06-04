@@ -69,11 +69,6 @@ async def callHowDoI(message, index, substr, testing):
             unescapedQuery = message["query"].replace("%20", " ")
             response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
             return response
-    else:
-         # Escape the url encoded characters such as %20
-        unescapedQuery = message["query"].replace("%20", " ")
-        response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
-        return response
 
 
 # Route made for testing the system through HTTP requests
