@@ -2,8 +2,6 @@ import re
 
 def _set_params(query):
 
-    curr = query['query'].strip().split(' ')
-
     DEFAULT = {
     'query': '',
     'num_answers': 1,
@@ -17,31 +15,17 @@ def _set_params(query):
 
     MAPPINGS = {
         'glink': 'link',
-        'gall': 'all',
-        'gnum': 'num_answers'
+        'gall': 'all'
     }
 
-    if ('gnum' in curr):
-
-        try:
-            num = curr[curr.index('gnum') + 1]
-        except:
-            print("Ignoring parameter... End of sentence")
-            curr.remove('gnum')
-        else:
-            if(num.isdigit()):
-                DEFAULT.update({'num_answers': int(num)})
-                curr.remove(num)
-            print("Ignoring parameter... No value given")
-            curr.remove('gnum')
-
-    aliases = list(filter(lambda x: x in curr, MAPPINGS))
+    aliases = list(filter(lambda x: x in query['query'], MAPPINGS))
     params = list(map(MAPPINGS.get, aliases))
-
     if not params: 
-        DEFAULT.update({'query':curr})
+        query['query'] = query['query'].strip().split(' ')
+        DEFAULT.update(query)
     else: 
-        query['query'] = [word for word in curr if not word in aliases]
+        regex= r'|'.join(map(r'{}'.format, aliases))
+        query['query'] = re.sub(regex, '', query['query']).strip().split(' ')
         updated_params = { **query, **dict(zip(params, [True] * len(params)))}
         DEFAULT.update(updated_params)
 
