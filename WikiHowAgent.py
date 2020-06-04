@@ -1,5 +1,5 @@
 import spacy
-from pywikihow import WikiHow, HowTo
+from pywikihow import WikiHow, search_wikihow
 
 def Question_generate(content):
   verb  = []
@@ -27,13 +27,22 @@ def WikiHowAgent(content) :
     Answer = 0
   #pywikihow to find one answer 
   else :
-    how_tos = HowTo(Question)
-    if how_to.summary.count('\n') < 20 :
-      Answer = "Here's a better answer from WikiHow: "+how_to.summary
-    else :
-      summary =  how_to.summary
-      summary=summary.splitlines()[:20]
+    how_tos = search_wikihow(Question,1)
+    how_to = how_tos[0].as_dict()
+    n_step = how_to['n_steps']
+    steps = how_to['steps']
+    print(1)
+    if n_step < 20 :
+      summary = []
+      for i in range(20) :
+        summary.append(steps[i]['summary'])
       summary ='\n'.join([str(elem) for elem in summary])
-      Answer = "Here's a better answer from WikiHow:\n"+summary+" \n" + how_to.url
+      Answer = "here i got you better answer from WikiHow"+summary
+    else :
+      summary = []
+      for i in range(20) :
+        summary.append(steps[i]['summary'])
+      summary ='\n'.join([str(elem) for elem in summary])
+      Answer = "here i got you better answer from WikiHow : \n"+summary+" \n here more result check the link :" + how_to['url']
   return Answer
 
