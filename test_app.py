@@ -22,4 +22,3 @@ def test_func():
         else:
             assert response == "success"
    
-    
