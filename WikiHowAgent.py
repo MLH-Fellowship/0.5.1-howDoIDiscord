@@ -36,12 +36,12 @@ def WikiHowAgent(content) :
       for i in range(n_step) :
         summary.append(steps[i]['summary'])
       summary ='\n'.join([str(elem) for elem in summary])
-      Answer = "here i got you better answer from WikiHow"+summary
+      Answer = summary
     else :
       summary = []
       for i in range(20) :
         summary.append(steps[i]['summary'])
       summary ='\n'.join([str(elem) for elem in summary])
-      Answer = "here i got you better answer from WikiHow : \n"+summary+" \n here more result check the link :" + how_to['url']
+      Answer = summary + " \n \n Check this link for more results: " + how_to['url']
   return Answer
 

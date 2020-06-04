@@ -47,7 +47,7 @@ async def callHowDoI(message, index, substr, testing):
             res = _howdoi(content)
         response = "<@{}>, {}".format(message.author.id, res)
         embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
-
+    
         try:
             botMsg = await message.channel.send(embed = embed)
         except discord.DiscordException as err:
@@ -108,6 +108,7 @@ async def on_ready():
 @client.event
 async def on_message(message):
     global content_save
+
     if message.author == client.user:
         return
 
@@ -115,11 +116,10 @@ async def on_message(message):
     content_save = content
 
     substr = "howdoi"
-
-    r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
+    r1 = content.rfind(substr)
     if r1 != -1:
-        await callHowDoI(message, r1, substr, False)
-
+        async with message.channel.typing():
+            await callHowDoI(message, r1, substr, False)
     elif content.startswith('!'):
         content = content[1:]
         if content.startswith('test'):
@@ -127,9 +127,9 @@ async def on_message(message):
             tmp = await client.send_message(message.channel, 'Calculating messages...')
             async for log in client.logs_from(message.channel, limit=100):
                 if log.author == message.author:
-                    counter += 1
+                    counter +=1
+                await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
-            await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
 @client.event
 async def on_reaction_add(reaction,user):
@@ -160,16 +160,14 @@ async def on_reaction_add(reaction,user):
                     global content_save
                     wikiHowResponse = WikiHowAgent(content_save)
                     if wikiHowResponse == 0:
-                        embed = discord.Embed(title="Here's a wiki how answer instead",
-                                        description="Couldn't find anything :(",
+                        embed = discord.Embed(title="Sorry!",
+                                        description="Couldn't find anything from WikiHow :cold_sweat:",
                                         color=discord.Color.green())
-                        embed.set_footer(text=wikiHowResponse)
                         await reaction.message.channel.send(embed=embed)
                     else:
-                        embed = discord.Embed(title="Here's a wiki how answer instead",
+                        embed = discord.Embed(title="Didn't answer your question? Here's a WikiHow answer that might help: ",
                                             description=wikiHowResponse,
                                             color=discord.Color.green())
-                        embed.set_footer(text=wikiHowResponse)
                         await reaction.message.channel.send(embed=embed)
                    
                
