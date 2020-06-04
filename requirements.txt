@@ -3,3 +3,5 @@ Werkzeug==1.0.0
 howdoi==1.2.1
 discord 
 python-dotenv==0.13.0
+spacy 
+pywikihow
