@@ -39,23 +39,14 @@ async def callHowDoI(message, index, substr, testing):
     content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
     content = content.lower() 
-    link = ''
 
     if not testing:
         if ((index + len(substr) == len(content))):
             res = 'Don\'t be shy, ask me anything!'
         else:
-            val = _howdoi(content)
-            if (val[0] == '★'):
-                res = " ".join(val.split('\n', 1)[1:])
-                link = val.split('\n', 1)[0]
-            else:
-                res = val 
-                link = "Sorry, could not find a good link for this!"
-        
+            res = _howdoi(content)
         response = "<@{}>, {}".format(message.author.id, res)
         embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
-        embed.set_footer(text = link)
 
         try:
             botMsg = await message.channel.send(embed = embed)
@@ -66,6 +57,7 @@ async def callHowDoI(message, index, substr, testing):
             logCall(content, fullUser,endTime-startTime)
             await botMsg.add_reaction('✅') 
             await botMsg.add_reaction('❌') 
+            
     else:
         # Escape the url encoded characters such as %20
         unescapedQuery = message["query"].replace("%20", " ")
