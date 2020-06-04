@@ -20,7 +20,7 @@ def _howdoi(query):
     response = howdoi(_set_params({'query':query}))
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response
-    
+
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
         json.dump(data, writeFile)
@@ -43,9 +43,7 @@ async def callHowDoI(message, index, substr):
             res = " ".join(val.split('\n', 1)[1:])
             link = val.split('\n', 1)[0]
         else:
-            res = val 
-            link = "Sorry, no link specified for this!"
-    
+            res = val     
     response = "<@{}>, {}".format(message.author.id, res)
     embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
     embed.set_footer(text = link)
