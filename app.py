@@ -10,6 +10,7 @@ from howdoi.howdoi import howdoi
 from datetime import datetime
 from dotenv import load_dotenv
 from parser import _set_params
+from pywikihow import WikiHow, search_wikihow
 
 from flask import Flask, request
 import os
@@ -159,7 +160,17 @@ async def on_reaction_add(reaction,user):
                     temp = jsonData['logs']
                     temp.append(data)
                     writeJSON(jsonData)
-     
+
+                async with reaction.message.channel.typing():
+                    # call to wikihow function here, await it's response then send it in am embed
+                    how_tos = search_wikihow(reaction.message.embeds[0].title, 1)
+                    embed = discord.Embed(title="Here's a wiki how answer instead",
+                                        description=str(how_tos[0].url),
+                                        color=discord.Color.green())
+                    embed.set_footer(text=how_tos[0].url)
+                    await reaction.message.channel.send(embed=embed)
+
+               
 
 # handle voice command in the future
 @client.command(name="voice")
