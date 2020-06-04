@@ -18,6 +18,7 @@ def Question_generate(content):
     QUESTION = "EMPTY"
   return QUESTION
 
+
 def WikiHowAgent(content) :
   #parse the question from the message to howdoi 
   Question = Question_generate(content)
