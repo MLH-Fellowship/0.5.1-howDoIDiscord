@@ -18,16 +18,22 @@ app = Flask(__name__)
 def _howdoi(query):
     query_list = query.split(' ')
     args = {
-        'query': query_list,
+        'query': '',
         'num_answers': 1, 
         'pos': 1, 
-        'all': True,
+        'all': False,
         'link': False,
         'clear_cache': False,
         'version': False,
         'color': False
     }
-    # TO DO : update according to user params
+    # TO DO : finish update according to user params
+    for i in range(len(query_list)):
+        if query_list[i] in args:
+            args[query_list[i]] = not args[query_list[i]] # toggle values 
+            query_list.pop(i)
+    args['query'] = query_list
+    print(args)
     response = howdoi.howdoi(args)
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response
@@ -63,7 +69,7 @@ async def callHowDoI(message, index, substr):
 
     try:
         botMsg = await message.channel.send(embed = embed)
-    except Exception as err:
+    except discord.DiscordException as err:
         print("Oops! {}".format(err))
     else:
         endTime = int(round(time.time() * 1000))
@@ -89,10 +95,7 @@ async def on_message(message):
 
     if message.author == client.user:
         return
-
-    content = message.content
-    fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()
+    content = message.content.lower()
     substr = "howdoi"
 
     r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
