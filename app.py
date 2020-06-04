@@ -1,3 +1,4 @@
+  
 import discord
 from discord.ext.commands import Bot
 import asyncio
@@ -25,39 +26,79 @@ def writeJSON(data):
     with open("logs.json", "w") as writeFile:
         json.dump(data, writeFile)
 
+
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
-async def callHowDoI(message, index, substr):
+
+async def callHowDoI(message, index, substr, testing):
     startTime = int(round(time.time() * 1000))
-    content = message.content
-    fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower() 
-    link = ''
+    if not testing:
+        content = message.content
+        fullUser = message.author.name+'#'+message.author.discriminator
+        content = content.lower() 
+        link = ''
 
-    if ((index + len(substr) == len(content))):
-        res = 'Don\'t be shy, ask me anything!'
-    else:
-        val = _howdoi(content)
-        if (val[0] == '★'):
-            res = " ".join(val.split('\n', 1)[1:])
-            link = val.split('\n', 1)[0]
+        if not testing:
+            if ((index + len(substr) == len(content))):
+                res = 'Don\'t be shy, ask me anything!'
+            else:
+                val = _howdoi(content)
+                if (val[0] == '★'):
+                    res = " ".join(val.split('\n', 1)[1:])
+                    link = val.split('\n', 1)[0]
+                else:
+                    res = val 
+                    link = "Sorry, could not find a good link for this!"
+            
+            response = "<@{}>, {}".format(message.author.id, res)
+            embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
+            embed.set_footer(text = link)
+
+            try:
+                botMsg = await message.channel.send(embed = embed)
+            except discord.DiscordException as err:
+                print("Oops! {}".format(err))
+            else:
+                endTime = int(round(time.time() * 1000))
+                logCall(content, fullUser,endTime-startTime)
+                await botMsg.add_reaction('✅') 
+                await botMsg.add_reaction('❌') 
         else:
-            res = val     
-    response = "<@{}>, {}".format(message.author.id, res)
-    embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
-    embed.set_footer(text = link)
+            # Escape the url encoded characters such as %20
+            unescapedQuery = message["query"].replace("%20", " ")
+            response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
+            return response
 
-    try:
-        botMsg = await message.channel.send(embed = embed)
-    except discord.DiscordException as err:
-        print("Oops! {}".format(err))
-    else:
-        endTime = int(round(time.time() * 1000))
-        logCall(content, fullUser,endTime-startTime)
-        await botMsg.add_reaction('✅') 
-        await botMsg.add_reaction('❌') 
-    
+
+# Route made for testing the system through HTTP requests
+@app.route('/test', methods=["POST"])
+def test():
+    testQuery = request.args.get('testquery') 
+    if not testQuery:
+        return {
+            "status":"error",
+            "body":"invalid paramaters"
+            }, 400
+    if testQuery[:6] != "howdoi":
+          return {
+            "status":"error",
+            "body":"howdoi keyword not found"
+            }, 400
+
+
+    testMessage = {
+        "author":"test",
+        "query": testQuery
+    }
+   
+    testCall = loop.run_until_complete(callHowDoI(testMessage, 0, "", True))
+    return {
+        "status":"success",
+        "body": testCall
+    }, 200
+
+
 @app.route('/posts', methods=['POST'])
 def result():
     print(request.form['sched'])
@@ -76,15 +117,13 @@ async def on_message(message):
 
     if message.author == client.user:
         return
+
     content = message.content.lower()
     substr = "howdoi"
 
     r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
     if r1 != -1:
-        await callHowDoI(message, r1, substr)
-      
-       # then wait for which reaction they click
-       # and go from there
+        await callHowDoI(message, r1, substr, False)
 
     elif content.startswith('!'):
         content = content[1:]
@@ -127,4 +166,14 @@ async def on_reaction_add(reaction,user):
 async def voice(ctx, arg):
     await ctx.send(arg)
 
-client.run(TOKEN)
+
+# If testing env variable set it means the script
+# is unit testing and only needs the flask server
+# not the discord bot
+if os.getenv("TESTING"):
+    print("In testing mode")
+    loop = asyncio.get_event_loop()
+    app.run()
+else:
+    print("In discord mode")
+    client.run(TOKEN)
