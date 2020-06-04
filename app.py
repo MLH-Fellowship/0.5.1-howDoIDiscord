@@ -57,7 +57,7 @@ async def callHowDoI(message, index, substr, testing):
             logCall(content, fullUser,endTime-startTime)
             await botMsg.add_reaction('✅') 
             await botMsg.add_reaction('❌') 
-     
+            
     else:
         # Escape the url encoded characters such as %20
         unescapedQuery = message["query"].replace("%20", " ")
