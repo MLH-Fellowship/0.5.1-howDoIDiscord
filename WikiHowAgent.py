@@ -17,6 +17,7 @@ def Question_generate(content):
     QUESTION = "EMPTY"
   return QUESTION
 
+
 def WikiHowAgent(content) :
   #parse the question from the message to howdoi 
   Question = Question_generate(content)
@@ -25,9 +26,13 @@ def WikiHowAgent(content) :
     Answer = 0
   #pywikihow to find one answer 
   else :
-    how_tos = search_wikihow(Question, 1)
-    assert len(how_tos) == 1
-    
-    Answer = "here i got you better answer from WikiHow"+str(how_tos[0])
-    print(Answer)
+    how_tos = HowTo(Question)
+    if how_to.summary.count('\n') < 20 :
+      Answer = "here i got you better answer from WikiHow"+how_to.summary
+    else :
+      summary =  how_to.summary
+      summary=summary.splitlines()[:20]
+      summary ='\n'.join([str(elem) for elem in summary])
+      Answer = "here i got you better answer from WikiHow : \n"+summary+" \n here more result check the link :" + how_to.url
   return Answer
+
