@@ -5,9 +5,10 @@ import sys
 import re
 import time
 import json
-from howdoi import howdoi
+from howdoi.howdoi import howdoi
 from datetime import datetime
 from dotenv import load_dotenv
+from parser import _set_params
 
 from flask import Flask, request
 import os
@@ -16,28 +17,10 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 app = Flask(__name__)
 
 def _howdoi(query):
-    query_list = query.split(' ')
-    args = {
-        'query': '',
-        'num_answers': 1, 
-        'pos': 1, 
-        'all': False,
-        'link': False,
-        'clear_cache': False,
-        'version': False,
-        'color': False
-    }
-    # TO DO : finish update according to user params
-    for i in range(len(query_list)):
-        if query_list[i] in args:
-            args[query_list[i]] = not args[query_list[i]] # toggle values 
-            query_list.pop(i)
-    args['query'] = query_list
-    print(args)
-    response = howdoi.howdoi(args)
+    response = howdoi(_set_params({'query':query}))
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response
-
+    
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
         json.dump(data, writeFile)
@@ -61,7 +44,7 @@ async def callHowDoI(message, index, substr):
             link = val.split('\n', 1)[0]
         else:
             res = val 
-            link = "Sorry, could not find a good link for this!"
+            link = "Sorry, no link specified for this!"
     
     response = "<@{}>, {}".format(message.author.id, res)
     embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
