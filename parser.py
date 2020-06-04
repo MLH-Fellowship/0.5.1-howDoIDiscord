@@ -1,27 +1,25 @@
 import re
 
-DEFAULT = {
+def _set_params(query):
+
+    DEFAULT = {
     'query': '',
     'num_answers': 1,
     'pos': 1,
     'all': False,
     'link': False,
-    'clear_cache': True,
+    'clear_cache': False,
     'version': False,
     'color': False
-}
+    }
 
-MAPPINGS = {
-    'glink': 'link',
-    'gall':'all'
-}
+    MAPPINGS = {
+        'glink': 'link',
+        'gall': 'all'
+    }
 
-def _set_params(query):
-    if(DEFAULT['clear_cache']):
-        print("CACHE SHOULD BE CLEARED")
     aliases = list(filter(lambda x: x in query['query'], MAPPINGS))
     params = list(map(MAPPINGS.get, aliases))
-
     if not params: 
         query['query'] = query['query'].strip().split(' ')
         DEFAULT.update(query)
@@ -31,5 +29,4 @@ def _set_params(query):
         updated_params = { **query, **dict(zip(params, [True] * len(params)))}
         DEFAULT.update(updated_params)
 
-    print(DEFAULT)
     return DEFAULT 
