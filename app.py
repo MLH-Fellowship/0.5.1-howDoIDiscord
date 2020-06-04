@@ -1,3 +1,4 @@
+  
 import discord
 from discord.ext.commands import Bot
 import asyncio
@@ -5,9 +6,10 @@ import sys
 import re
 import time
 import json
-from howdoi import howdoi
+from howdoi.howdoi import howdoi
 from datetime import datetime
 from dotenv import load_dotenv
+from parser import _set_params
 
 from flask import Flask, request
 import os
@@ -16,44 +18,63 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 app = Flask(__name__)
 
 def _howdoi(query):
-    # Return this if no query provided along with howdoi prompt
-    query_list = query.split(' ')
-    if len(query_list) == 1:
-        return 'Don\'t be shy, ask me anything!'
-    response = howdoi.howdoi(vars(howdoi.get_parser().parse_args(query_list)))
+    response = howdoi(_set_params({'query':query}))
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
-    return response 
+    return response
 
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
         json.dump(data, writeFile)
 
+
 def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
-async def callHowDoI(message, testing):
+
+async def callHowDoI(message, index, substr, testing):
     startTime = int(round(time.time() * 1000))
-    
     if not testing:
         content = message.content
-        content = content.lower()  
-    
-        response = "<@{}>, {}".format(message.author.id, _howdoi(content))
-        embed = discord.Embed(title=" ".join(content.split(' ')[1:]), description=response, color=discord.Color.green())
-
-        botMsg = await message.channel.send(embed=embed) 
         fullUser = message.author.name+'#'+message.author.discriminator
-        
-        endTime = int(round(time.time() * 1000))
-        logCall(content, fullUser,endTime-startTime)
-        
-        await botMsg.add_reaction('✅')
-        await botMsg.add_reaction('❌')
+        content = content.lower() 
+        link = ''
+
+        if not testing:
+            if ((index + len(substr) == len(content))):
+                res = 'Don\'t be shy, ask me anything!'
+            else:
+                val = _howdoi(content)
+                if (val[0] == '★'):
+                    res = " ".join(val.split('\n', 1)[1:])
+                    link = val.split('\n', 1)[0]
+                else:
+                    res = val 
+                    link = "Sorry, could not find a good link for this!"
+            
+            response = "<@{}>, {}".format(message.author.id, res)
+            embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
+            embed.set_footer(text = link)
+
+            try:
+                botMsg = await message.channel.send(embed = embed)
+            except discord.DiscordException as err:
+                print("Oops! {}".format(err))
+            else:
+                endTime = int(round(time.time() * 1000))
+                logCall(content, fullUser,endTime-startTime)
+                await botMsg.add_reaction('✅') 
+                await botMsg.add_reaction('❌') 
+        else:
+            # Escape the url encoded characters such as %20
+            unescapedQuery = message["query"].replace("%20", " ")
+            response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
+            return response
     else:
-        # Escape the url encoded characters such as %20
+         # Escape the url encoded characters such as %20
         unescapedQuery = message["query"].replace("%20", " ")
         response = "<@{}>, {}".format(message["author"], _howdoi(unescapedQuery))
         return response
+
 
 # Route made for testing the system through HTTP requests
 @app.route('/test', methods=["POST"])
@@ -76,7 +97,7 @@ def test():
         "query": testQuery
     }
    
-    testCall = loop.run_until_complete(callHowDoI(testMessage, True))
+    testCall = loop.run_until_complete(callHowDoI(testMessage, 0, "", True))
     return {
         "status":"success",
         "body": testCall
@@ -102,16 +123,12 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    content = message.content
-    fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower()  
+    content = message.content.lower()
+    substr = "howdoi"
 
-    r1 = content.find("howdoi")
+    r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
     if r1 != -1:
-        await callHowDoI(message, False)
-
-       # then wait for which reaction they click
-       # and go from there
+        await callHowDoI(message, r1, substr, False)
 
     elif content.startswith('!'):
         content = content[1:]
