@@ -31,10 +31,9 @@ def WikiHowAgent(content) :
     how_to = how_tos[0].as_dict()
     n_step = how_to['n_steps']
     steps = how_to['steps']
-    print(1)
     if n_step < 20 :
       summary = []
-      for i in range(20) :
+      for i in range(n_step) :
         summary.append(steps[i]['summary'])
       summary ='\n'.join([str(elem) for elem in summary])
       Answer = "here i got you better answer from WikiHow"+summary

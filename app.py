@@ -11,7 +11,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from parser import _set_params
 
-from WikiHowAgent import Question_generate, WikiHowAgent
+from WikiHowAgent import  WikiHowAgent
 
 from flask import Flask, request
 import os
@@ -55,7 +55,6 @@ async def callHowDoI(message, index, substr, testing):
         
         response = "<@{}>, {}".format(message.author.id, res)
         embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
-        embed.set_footer(text = link)
 
         try:
             botMsg = await message.channel.send(embed = embed)
@@ -108,19 +107,20 @@ def result():
     return 'Received !'
 
 client = Bot(command_prefix = "$")
-
+content_save =""
 @client.event
 async def on_ready():
     print('Logged in as {} - {}'.format(client.user.name, client.user.id))
     print('------')
-
 @client.event
 async def on_message(message):
-
+    global content_save
     if message.author == client.user:
         return
 
     content = message.content.lower()
+    content_save = content
+
     substr = "howdoi"
 
     r1 = content.rfind(substr) # get the last occurrence of substr in case people specify multiple
@@ -154,7 +154,6 @@ async def on_reaction_add(reaction,user):
                 data["query"] = reaction.message.embeds[0].title
                 data["response"] = msgContent
                 data["time"] = int(time.time())               
-
                 with open ("logs.json") as file:
                     jsonData = json.load(file)
                     temp = jsonData['logs']
@@ -165,13 +164,20 @@ async def on_reaction_add(reaction,user):
                 # to give the user
                 async with reaction.message.channel.typing():
                     # await it's response then send it in am embed
-                    wikiHowResponse = WikiHowAgent(reaction.message.embeds[0].title)
-                   
-                    embed = discord.Embed(title="Here's a wiki how answer instead",
-                                        description=wikiHowResponse,
+                    global content_save
+                    wikiHowResponse = WikiHowAgent(content_save)
+                    if wikiHowResponse == 0:
+                        embed = discord.Embed(title="Here's a wiki how answer instead",
+                                        description="Couldn't find anything :(",
                                         color=discord.Color.green())
-                    embed.set_footer(text=wikiHowResponse)
-                    await reaction.message.channel.send(embed=embed)
+                        embed.set_footer(text=wikiHowResponse)
+                        await reaction.message.channel.send(embed=embed)
+                    else:
+                        embed = discord.Embed(title="Here's a wiki how answer instead",
+                                            description=wikiHowResponse,
+                                            color=discord.Color.green())
+                        embed.set_footer(text=wikiHowResponse)
+                        await reaction.message.channel.send(embed=embed)
                    
                
 # handle voice command in the future
