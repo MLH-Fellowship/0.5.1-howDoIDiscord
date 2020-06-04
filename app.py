@@ -118,7 +118,8 @@ async def on_message(message):
     substr = "howdoi"
     r1 = content.rfind(substr)
     if r1 != -1:
-        await callHowDoI(message, r1, substr, False)
+        async with message.channel.typing():
+            await callHowDoI(message, r1, substr, False)
     elif content.startswith('!'):
         content = content[1:]
         if content.startswith('test'):
