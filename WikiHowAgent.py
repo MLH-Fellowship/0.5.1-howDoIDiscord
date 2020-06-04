@@ -1,5 +1,5 @@
 import spacy
-from pywikihow import WikiHow, search_wikihow
+from pywikihow import WikiHow, HowTo
 
 def Question_generate(content):
   verb  = []
