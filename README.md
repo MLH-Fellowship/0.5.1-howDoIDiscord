@@ -14,7 +14,7 @@ A discord bot interface for the popular [howdoi](https://github.com/gleitz/howdo
 <p align="center">
     <img
       alt="Req"
-      src="https://i.imgur.com/xwmT9jA.png"
+      src="https://i.imgur.com/dr8SHM3.png"
       width="800"
     />
   </a>
