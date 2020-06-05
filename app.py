@@ -45,6 +45,8 @@ async def callHowDoI(message, index, substr, testing):
             res = 'Don\'t be shy, ask me anything!'
         else:
             res = _howdoi(content)
+            if len(res)>2000:
+                res = res[:2000]
         response = "<@{}>, {}".format(message.author.id, res)
         embed = discord.Embed(title=" ".join(content.split(substr, 1)[1:]), description=response, color=discord.Color.green())
     
