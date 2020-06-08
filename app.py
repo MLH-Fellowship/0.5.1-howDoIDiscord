@@ -25,9 +25,9 @@ def _howdoi(query):
     return response
 
 def _find_str(substr, text):
-    p = re.compile(r'\b'+substr+r'\b')
+    pattern = re.compile(r'\b'+substr+r'\b')
     try: 
-        return p.search(text).span()[1]
+        return pattern.search(text).span()[1]
     except:
         return -1
 
