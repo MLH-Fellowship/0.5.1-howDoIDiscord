@@ -24,6 +24,13 @@ def _howdoi(query):
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response
 
+def _find_str(substr, text):
+    pattern = re.compile(r'\b'+substr+r'\b')
+    try: 
+        return pattern.search(text).span()[1]
+    except:
+        return -1
+
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
         json.dump(data, writeFile)
@@ -41,7 +48,7 @@ async def callHowDoI(message, index, substr, testing):
     content = content.lower() 
 
     if not testing:
-        if ((index + len(substr) == len(content))):
+        if ((index == len(content))):
             res = 'Don\'t be shy, ask me anything!'
         else:
             res = _howdoi(content)
@@ -118,7 +125,7 @@ async def on_message(message):
     content_save = content
 
     substr = "howdoi"
-    r1 = content.rfind(substr)
+    r1 = _find_str(substr, content)
     if r1 != -1:
         async with message.channel.typing():
             await callHowDoI(message, r1, substr, False)
