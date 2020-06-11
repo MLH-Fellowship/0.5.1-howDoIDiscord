@@ -23,13 +23,7 @@ def _howdoi(query):
     response = howdoi(_set_params({'query':query}))
     response = re.sub(r'\n\n+', '\n\n', response).strip() 
     return response
-
-def _find_str(substr, text):
-    pattern = re.compile(r'\b'+substr+r'\b')
-    try: 
-        return pattern.search(text).span()[1]
-    except:
-        return -1
+    
 
 def writeJSON(data):
     with open("logs.json", "w") as writeFile:
@@ -40,18 +34,14 @@ def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
 
-async def callHowDoI(message, index, substr, testing):
+async def callHowDoI(message, content, substr,g, testing):
     startTime = int(round(time.time() * 1000))
-   
-    content = message.content
     fullUser = message.author.name+'#'+message.author.discriminator
-    content = content.lower() 
-
     if not testing:
-        if ((index == len(content))):
+        if len(content[g.start()+len(substr)+1:])==0:
             res = 'Don\'t be shy, ask me anything!'
         else:
-            res = _howdoi(content)
+            res = _howdoi(content[g.start()+len(substr)+1:])
             if len(res)>2000:
                 res = res[:2000]
         response = "<@{}>, {}".format(message.author.id, res)
@@ -123,21 +113,20 @@ async def on_message(message):
 
     content = message.content.lower()
     content_save = content
-
     substr = "howdoi"
-    r1 = _find_str(substr, content)
-    if r1 != -1:
+    pattern = re.compile(r'\!'+substr+r'\b')
+    g = pattern.search(content)
+    if g != None: 
         async with message.channel.typing():
-            await callHowDoI(message, r1, substr, False)
-    elif content.startswith('!'):
-        content = content[1:]
-        if content.startswith('test'):
-            counter = 0
-            tmp = await client.send_message(message.channel, 'Calculating messages...')
-            async for log in client.logs_from(message.channel, limit=100):
-                if log.author == message.author:
-                    counter +=1
-                await client.edit_message(tmp, 'You have {} messages.'.format(counter))
+            await callHowDoI(message, content, substr,g, False)
+
+    elif content.startswith('!test'):
+        counter = 0
+        tmp = await client.send_message(message.channel, 'Calculating messages...')
+        async for log in client.logs_from(message.channel, limit=100):
+            if log.author == message.author:
+                counter +=1
+            await client.edit_message(tmp, 'You have {} messages.'.format(counter))
 
 
 @client.event
@@ -161,7 +150,7 @@ async def on_reaction_add(reaction,user):
                     temp = jsonData['logs']
                     temp.append(data)
                     writeJSON(jsonData)
-
+                    
                 # Query the wikihow api and get a better response hopefully
                 # to give the user
                 async with reaction.message.channel.typing():

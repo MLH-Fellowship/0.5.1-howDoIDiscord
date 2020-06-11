@@ -5,10 +5,11 @@ def Question_generate(content):
   verb  = []
   noun = []
   nlp = spacy.load("en_core_web_sm")
-  pos = content.lower().find("howdoi")
-  Q_Token = nlp(content[pos+len("howdoi"):])
+  pos = content.lower().find("!howdoi")
+  Q_Token = nlp(content[pos+len("!howdoi"):])
   for token in Q_Token :
-    if token.pos_ == "VERB":
+    print(token.pos_)
+    if token.pos_ in ["VERB" ,"NOUN","PROPN"] :
       verb.append(token)
   if len(verb) !=0:
       v_pos = content.lower().find(verb[0].text)
@@ -23,6 +24,7 @@ def WikiHowAgent(content) :
   #parse the question from the message to howdoi 
   Question = Question_generate(content)
   #if no question was exist
+  print(Question)
   if Question == "EMPTY" :
     Answer = 0
   #pywikihow to find one answer 
@@ -44,4 +46,3 @@ def WikiHowAgent(content) :
       summary ='\n'.join([str(elem) for elem in summary])
       Answer = summary + " \n \n Check this link for more results: " + how_to['url']
   return Answer
-
