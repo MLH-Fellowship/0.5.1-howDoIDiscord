@@ -14,7 +14,6 @@ def Question_generate(content):
   if len(verb) !=0:
       v_pos = content.lower().find(verb[0].text)
       QUESTION = "how to "+content[v_pos:]
-      print(QUESTION)
   else :
     QUESTION = "EMPTY"
   return QUESTION
