@@ -34,14 +34,21 @@ def logCall(query, user, roundTripTime):
     print("[{}] {} - {} {}ms".format(datetime.now(), user, query, roundTripTime))
 
 
-async def callHowDoI(message, content, substr,g, testing):
+async def callHowDoI(message, content, substr,search, testing):
     startTime = int(round(time.time() * 1000))
     fullUser = message.author.name+'#'+message.author.discriminator
     if not testing:
-        if len(content[g.start()+len(substr)+1:])==0:
+        if len(content[search.start()+len(substr)+1:])==0:
             res = 'Don\'t be shy, ask me anything!'
         else:
-            res = _howdoi(content[g.start()+len(substr)+1:])
+            pattern = re.compile(r'\b'+"--wikihow"+r'\b')
+            search_wiki = pattern.search(content)
+            if search_wiki != None :
+                res =  WikiHowAgent(content)
+                print("res1")
+            else :
+                res = _howdoi(content[search.start()+len(substr)+1:])
+                print("res2")
             if len(res)>2000:
                 res = res[:2000]
         response = "<@{}>, {}".format(message.author.id, res)
@@ -115,10 +122,10 @@ async def on_message(message):
     content_save = content
     substr = "howdoi"
     pattern = re.compile(r'\!'+substr+r'\b')
-    g = pattern.search(content)
-    if g != None: 
+    search = pattern.search(content)
+    if search != None: 
         async with message.channel.typing():
-            await callHowDoI(message, content, substr,g, False)
+            await callHowDoI(message, content, substr,search, False)
 
     elif content.startswith('!test'):
         counter = 0
