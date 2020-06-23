@@ -41,9 +41,7 @@ async def callHowDoI(message, content, substr,search, testing):
         if len(content[search.start()+len(substr)+1:])==0:
             res = 'Don\'t be shy, ask me anything!'
         else:
-            pattern = re.compile(r'\b'+"--wikihow"+r'\b')
-            search_wiki = pattern.search(content)
-            if search_wiki != None :
+            if  content.lower().find("--wikihow") != -1 :
                 res =  WikiHowAgent(content)
                 print("res1")
             else :
